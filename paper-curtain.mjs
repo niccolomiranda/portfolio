@@ -4,23 +4,38 @@ import {
   Program,
   Mesh,
   Triangle,
-  Texture, Color
+  Texture, Color,Vec2
 } from "https://unpkg.com/ogl@0.0.65/src/index.mjs";
 
 import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js'
 
 const GUI = new dat.GUI();
+GUI.hide()
 
 class PaperCurtain {
   constructor(gl, {color,background,backgroundOpacity,texture,amplitude,rippedFrequency,rippedAmplitude,curveFrequency,curveAmplitude,rippedDelta,rippedHeight} = {}) {
+    this.gl = gl
+    
     const geometry = new Triangle(gl);
 
     const vertex = /* glsl */ `
       attribute vec2 uv;
       attribute vec2 position;
       varying vec2 vUv;
+      varying vec2 vImageUv;
+
+      uniform vec2 uRatio;
+
+      float map(float value, float min1, float max1, float min2, float max2) {
+        return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+      }
+
       void main() {
           vUv = uv;
+          vImageUv = vec2(
+            map(uv.x, 0.0, 1.0, 0.5 - uRatio.x / 2.0, 0.5 + uRatio.x / 2.0),
+            map(uv.y, 0.0, 1.0, 0.5 - uRatio.y / 2.0, 0.5 + uRatio.y / 2.0)
+          );
           gl_Position = vec4(position, 0, 1);
       }
     `;
@@ -41,9 +56,11 @@ class PaperCurtain {
         uniform sampler2D uTexture;
         uniform float uRippedHeight;
         uniform vec3 uColor;
+        uniform sampler2D uImage;
         uniform vec3 uBackground;
         uniform float uBackgroundOpacity;
         varying vec2 vUv;
+        varying vec2 vImageUv;
 
         // Simplex 2D noise
         //
@@ -110,7 +127,12 @@ class PaperCurtain {
           gl_FragColor.a = uBackgroundOpacity;
 
           if(vUv.y > colorLimit) {
-            gl_FragColor = vec4(uColor,1.);
+            vec4 image = texture2D(uImage , vImageUv);
+            if(image.a > 0.) {
+              gl_FragColor = image;
+            } else {
+              gl_FragColor = vec4(uColor,1.);
+            }
           } else if(vUv.y > rippedLimit) {
             gl_FragColor = texture2D(uTexture, aspectUv);
           }
@@ -164,6 +186,12 @@ class PaperCurtain {
       uRippedDelta: {
         value: rippedDelta
       },
+      uImage: {
+        value: new Texture(this.gl)
+      },
+      uRatio: {
+        value: new Vec2(0,0)
+      },
       uColor: {
         value: params.color
       },
@@ -184,18 +212,21 @@ class PaperCurtain {
 
     this.mesh = new Mesh(gl, { geometry, program });
   
-    GUI.add(this.uniforms.uMaxAmplitude, 'value').name('amplitude')
-    GUI.add(this.uniforms.uRippedNoiseFrequency, 'value').name('ripped frequency').step(0.01)
-    GUI.add(this.uniforms.uRippedNoiseAmplitude, 'value').name('ripped amplitude').step(0.01)
-    GUI.add(this.uniforms.uCurveNoiseFrequency, 'value').name('curve frequency').step(0.01)
-    GUI.add(this.uniforms.uCurveNoiseAmplitude, 'value').name('curve amplitude').step(0.01)
-    GUI.add(this.uniforms.uRippedDelta, 'value').name('ripped delta').step(0.01)
-    GUI.add(this.uniforms.uRippedHeight, 'value').name('ripped height').step(0.01)
-    GUI.add(this.uniforms.uProgress, 'value').name('progress').min(0).max(1).step(0.01).listen()
-    GUI.addColor(params, 'color').name('color').onChange((color)=>{
-      const [x,y,z] = color
-      this.uniforms.uColor.value = new Color(x / 255,y / 255,z / 255)
-    })
+    if(GUI) {
+      GUI.add(this.uniforms.uMaxAmplitude, 'value').name('amplitude')
+      GUI.add(this.uniforms.uRippedNoiseFrequency, 'value').name('ripped frequency').step(0.01)
+      GUI.add(this.uniforms.uRippedNoiseAmplitude, 'value').name('ripped amplitude').step(0.01)
+      GUI.add(this.uniforms.uCurveNoiseFrequency, 'value').name('curve frequency').step(0.01)
+      GUI.add(this.uniforms.uCurveNoiseAmplitude, 'value').name('curve amplitude').step(0.01)
+      GUI.add(this.uniforms.uRippedDelta, 'value').name('ripped delta').step(0.01)
+      GUI.add(this.uniforms.uRippedHeight, 'value').name('ripped height').step(0.01)
+      GUI.add(this.uniforms.uProgress, 'value').name('progress').min(0).max(1).step(0.01).listen()
+      GUI.addColor(params, 'color').name('color').onChange((color)=>{
+        const [x,y,z] = color
+        this.uniforms.uColor.value = new Color(x / 255,y / 255,z / 255)
+      })
+    }
+
   }
 
   setBackground(color,opacity) {
@@ -205,6 +236,33 @@ class PaperCurtain {
 
   setColor(color) {
     this.uniforms.uColor.value = new Color(color)
+  }
+
+  setImage(src) {
+        const texture = new Texture(this.gl, {
+      wrapS: this.gl.REPEAT,
+      wrapT: this.gl.REPEAT
+    });
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous'
+    img.src = src;
+
+    return new Promise((resolve,reject)=> {
+      img.onload = () => {
+        texture.image = img
+        const naturalRatio = img.naturalWidth/img.naturalHeight
+        const viewportRatio = window.innerWidth/window.innerHeight
+        const width = viewportRatio > naturalRatio ? window.innerWidth : window.innerHeight * naturalRatio
+        const height = width / naturalRatio
+        const ratio = new Vec2(
+          window.innerWidth / width,
+          window.innerHeight / height
+        )
+        this.uniforms.uRatio.value = ratio
+        this.uniforms.uImage.value = texture
+      }
+    })
   }
 }
 
@@ -247,11 +305,13 @@ export default class PaperCurtainEffect {
     this.ease = ease
     this.duration = duration
 
-    GUI.add(this,'in')
-    GUI.add(this,'out')
-    GUI.add(this,'isLooping')
-    GUI.add(this, 'ease')
-    GUI.add(this, 'duration')
+    if(GUI) {
+      GUI.add(this,'in')
+      GUI.add(this,'out')
+      GUI.add(this,'isLooping')
+      GUI.add(this, 'ease')
+      GUI.add(this, 'duration')
+    }
   }
 
   destroy() {
@@ -271,7 +331,7 @@ export default class PaperCurtainEffect {
 
   initGL() {
     //  renderer
-    this.renderer = new Renderer({canvas: this.canvas, antialias: true, alpha:true,dpr: devicePixelRatio});
+    this.renderer = new Renderer({canvas: this.canvas, antialias: true, alpha:true,dpr: 1});
     this.gl = this.renderer.gl;
 
     // camera
