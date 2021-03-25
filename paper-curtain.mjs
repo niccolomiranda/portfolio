@@ -150,8 +150,9 @@ class PaperCurtain {
     // update image value with source once loaded
     const img = new Image();
     img.crossOrigin = 'anonymous'
-    img.src = texture;
     img.onload = () => (this.texture.image = img);
+    img.src = texture;
+    
 
     const params = {
       color: new Color(color)
@@ -239,7 +240,7 @@ class PaperCurtain {
   }
 
   setImage(src) {
-        const texture = new Texture(this.gl, {
+    const texture = new Texture(this.gl, {
       wrapS: this.gl.REPEAT,
       wrapT: this.gl.REPEAT
     });
