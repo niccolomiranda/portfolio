@@ -245,11 +245,11 @@ class PaperCurtain {
       wrapT: this.gl.REPEAT
     });
 
+    
+
     const img = new Image();
     img.crossOrigin = 'anonymous'
-    img.src = src;
-
-    return new Promise((resolve,reject)=> {
+    const promise = new Promise((resolve,reject) => {
       img.onload = () => {
         texture.image = img
         const naturalRatio = img.naturalWidth/img.naturalHeight
@@ -262,8 +262,16 @@ class PaperCurtain {
         )
         this.uniforms.uRatio.value = ratio
         this.uniforms.uImage.value = texture
+  
+        resolve()
       }
     })
+
+
+    img.src = src;
+    
+
+    return promise
   }
 }
 
