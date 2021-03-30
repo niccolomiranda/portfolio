@@ -59,6 +59,7 @@ class PaperCurtain {
         uniform sampler2D uImage;
         uniform vec3 uBackground;
         uniform float uBackgroundOpacity;
+        uniform bool uInverted;
         varying vec2 vUv;
         varying vec2 vImageUv;
 
@@ -127,7 +128,7 @@ class PaperCurtain {
           gl_FragColor.a = uBackgroundOpacity;
 
           if(vUv.y > colorLimit) {
-            vec4 image = texture2D(uImage , vImageUv);
+            vec4 image = texture2D(uImage, uInverted ? vec2(0.,1.) - vImageUv : vImageUv );
             if(image.a > 0.) {
               gl_FragColor = image;
             } else {
@@ -201,6 +202,9 @@ class PaperCurtain {
       },
       uBackgroundOpacity: {
         value: backgroundOpacity
+      },
+      uInverted: {
+        value: false
       }
     }
 
@@ -237,6 +241,10 @@ class PaperCurtain {
 
   setColor(color) {
     this.uniforms.uColor.value = new Color(color)
+  }
+
+  setInverted(value) {
+    this.uniforms.uInverted.value = value
   }
 
   setImage(src) {
