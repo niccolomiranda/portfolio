@@ -1,3 +1,5 @@
+//Niccolo Miranda 2021. All rights reserved,
+
 import {
   Renderer,
   Camera,
