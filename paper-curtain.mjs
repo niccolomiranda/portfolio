@@ -7,20 +7,18 @@
 //Free plugins built using this resource should have a visible mention
 //and link to the original work.
 
+import { Renderer } from "https://unpkg.com/ogl@0.0.74/src/core/Renderer.js";
+import { Program } from "https://unpkg.com/ogl@0.0.74/src/core/Program.js";
+import { Texture } from "https://unpkg.com/ogl@0.0.74/src/core/Texture.js";
+import { Triangle } from "https://unpkg.com/ogl@0.0.74/src/extras/Triangle.js";
+import { Mesh } from "https://unpkg.com/ogl@0.0.74/src/core/Mesh.js";
+import { Vec2 } from "https://unpkg.com/ogl@0.0.74/src/math/Vec2.js";
+import { Color } from "https://unpkg.com/ogl@0.0.74/src/math/Color.js";
 
-import {
-  Renderer,
-  Camera,
-  Program,
-  Mesh,
-  Triangle,
-  Texture, Color,Vec2
-} from "https://unpkg.com/ogl@0.0.65/src/index.mjs";
+//import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js'
 
-import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js'
-
-const GUI = new dat.GUI();
-GUI.hide()
+//const GUI = new dat.GUI();
+//GUI.hide()
 
 class PaperCurtain {
   constructor(gl, {color,background,backgroundOpacity,texture,amplitude,rippedFrequency,rippedAmplitude,curveFrequency,curveAmplitude,rippedDelta,rippedHeight} = {}) {
@@ -360,10 +358,6 @@ export default class PaperCurtainEffect {
     //  renderer
     this.renderer = new Renderer({canvas: this.canvas, antialias: true, alpha:true,dpr: 1});
     this.gl = this.renderer.gl;
-
-    // camera
-    this.camera = new Camera(this.gl);
-    this.camera.position.z = 5;
   }
 
   in() {
