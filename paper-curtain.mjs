@@ -224,22 +224,6 @@ class PaperCurtain {
     });
 
     this.mesh = new Mesh(gl, { geometry, program });
-  
-    if(GUI) {
-      GUI.add(this.uniforms.uMaxAmplitude, 'value').name('amplitude')
-      GUI.add(this.uniforms.uRippedNoiseFrequency, 'value').name('ripped frequency').step(0.01)
-      GUI.add(this.uniforms.uRippedNoiseAmplitude, 'value').name('ripped amplitude').step(0.01)
-      GUI.add(this.uniforms.uCurveNoiseFrequency, 'value').name('curve frequency').step(0.01)
-      GUI.add(this.uniforms.uCurveNoiseAmplitude, 'value').name('curve amplitude').step(0.01)
-      GUI.add(this.uniforms.uRippedDelta, 'value').name('ripped delta').step(0.01)
-      GUI.add(this.uniforms.uRippedHeight, 'value').name('ripped height').step(0.01)
-      GUI.add(this.uniforms.uProgress, 'value').name('progress').min(0).max(1).step(0.01).listen()
-      GUI.addColor(params, 'color').name('color').onChange((color)=>{
-        const [x,y,z] = color
-        this.uniforms.uColor.value = new Color(x / 255,y / 255,z / 255)
-      })
-    }
-
   }
 
   setBackground(color,opacity) {
