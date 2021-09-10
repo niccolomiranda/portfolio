@@ -313,14 +313,6 @@ export default class PaperCurtainEffect {
     this.isLooping = false
     this.ease = ease
     this.duration = duration
-
-    if(GUI) {
-      GUI.add(this,'in')
-      GUI.add(this,'out')
-      GUI.add(this,'isLooping')
-      GUI.add(this, 'ease')
-      GUI.add(this, 'duration')
-    }
   }
 
   destroy() {
