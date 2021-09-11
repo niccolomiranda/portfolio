@@ -122,7 +122,7 @@ class PaperCurtain {
 
 
           float amplitude = sin(uProgress * PI);
-          float curve = amplitude * uMaxAmplitude *  sin(vUv.x * PI);
+          float curve = amplitude * uMaxAmplitude *  sin((uHorizontal == 1. ? (1. - vUv.x) : vUv.y) * PI);
 
           float rippedNoise1 = fbm(aspectUv * uRippedNoiseFrequency) * uRippedNoiseAmplitude * amplitude;
           float curveNoise1 = snoise((aspectUv + vec2(-0.5)) * uCurveNoiseFrequency) * uCurveNoiseAmplitude * amplitude;
