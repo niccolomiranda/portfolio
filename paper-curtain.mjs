@@ -136,14 +136,14 @@ class PaperCurtain {
           gl_FragColor.rgb = uBackground;
           gl_FragColor.a = uBackgroundOpacity;
 
-          if( uHorizontal == 1. ? (1. - vUv.x) : vUv.y > colorLimit) {
+          if( (uHorizontal == 1. ? (1. - vUv.x) : vUv.y) > colorLimit) {
             vec4 image = texture2D(uImage, uInverted ? vec2(0.,1.) - vImageUv : vImageUv );
             if(image.a > 0.) {
               gl_FragColor = image;
             } else {
               gl_FragColor = vec4(uColor,1.);
             }
-          } else if(uHorizontal == 1. ? (1. - vUv.x) : vUv.y > rippedLimit) {
+          } else if( (uHorizontal == 1. ? (1. - vUv.x) : vUv.y) > rippedLimit) {
             gl_FragColor = texture2D(uTexture, aspectUv);
           }
             
