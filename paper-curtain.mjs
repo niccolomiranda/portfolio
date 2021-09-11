@@ -296,7 +296,8 @@ export default class PaperCurtainEffect {
     curveFrequency= 1,
     curveAmplitude= 1,
     rippedDelta= 1,
-    rippedHeight= 0.07
+    rippedHeight= 0.07,
+    horizontal = false
   } = {}) {
     this.canvas = canvas
 
@@ -308,7 +309,7 @@ export default class PaperCurtainEffect {
     this.resizeObserver = new ResizeObserver(this.onCanvasResizeHandler)
     this.resizeObserver.observe(this.canvas)
 
-    this.curtain = new PaperCurtain(this.gl, {color,background,backgroundOpacity,texture,amplitude,rippedFrequency,rippedAmplitude,curveFrequency,curveAmplitude,rippedDelta,rippedHeight})
+    this.curtain = new PaperCurtain(this.gl, {color,background,backgroundOpacity,texture,amplitude,rippedFrequency,rippedAmplitude,curveFrequency,curveAmplitude,rippedDelta,rippedHeight,horizontal})
 
     // frame loop
     this.onFrameHandler = this.onFrame.bind(this)
