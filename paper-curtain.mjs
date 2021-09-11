@@ -21,7 +21,7 @@ import { Color } from "https://unpkg.com/ogl@0.0.74/src/math/Color.js";
 //GUI.hide()
 
 class PaperCurtain {
-  constructor(gl, {color,background,backgroundOpacity,texture,amplitude,rippedFrequency,rippedAmplitude,curveFrequency,curveAmplitude,rippedDelta,rippedHeight} = {}) {
+  constructor(gl, {color,background,backgroundOpacity,texture,amplitude,rippedFrequency,rippedAmplitude,curveFrequency,curveAmplitude,rippedDelta,rippedHeight,horizontal} = {}) {
     this.gl = gl
     
     const geometry = new Triangle(gl);
@@ -53,6 +53,7 @@ class PaperCurtain {
         #define NUM_OCTAVES 5
 
         precision highp float;
+        uniform float uHorizontal;
         uniform float uProgress;
         uniform float uMaxAmplitude;
         uniform float uRippedNoiseFrequency;
@@ -135,14 +136,14 @@ class PaperCurtain {
           gl_FragColor.rgb = uBackground;
           gl_FragColor.a = uBackgroundOpacity;
 
-          if(vUv.x > colorLimit) {
+          if( uHorizontal == 1. ? (1. - vUv.x) : vUv.y > colorLimit) {
             vec4 image = texture2D(uImage, uInverted ? vec2(0.,1.) - vImageUv : vImageUv );
             if(image.a > 0.) {
               gl_FragColor = image;
             } else {
               gl_FragColor = vec4(uColor,1.);
             }
-          } else if(vUv.x > rippedLimit) {
+          } else if(uHorizontal == 1. ? (1. - vUv.x) : vUv.y > rippedLimit) {
             gl_FragColor = texture2D(uTexture, aspectUv);
           }
             
@@ -213,6 +214,9 @@ class PaperCurtain {
       },
       uInverted: {
         value: false
+      },
+      uHorizontal: {
+         value: horizontal ? 1 : 0
       }
     }
 
