@@ -67,7 +67,9 @@ class GLImage extends GLContext {
     this.mouse = new Vec2(-1);
     this.velocity = new Vec2();
 
-    this.flowmap = new Flowmap(this.gl);
+    this.flowmap = new Flowmap(this.gl, {
+      falloff: 0.5
+    });
 
     this.geometry = new Triangle(this.gl);
     this.program = new Program(this.gl, {
@@ -216,15 +218,18 @@ class GLImage extends GLContext {
           vec4 dithered = dither8x8(gl_FragCoord.xy,texture2D(uTexture,uv));
           // float gray = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
 
-          gl_FragColor = mix( tex, texture2D(uPaper,vUv), flow.b);
-          gl_FragColor = tex;
-          if(flow.b>0.3) {
-            gl_FragColor = texture2D(uPaper,vUv);
-          }
+          gl_FragColor = mix( tex, texture2D(uPaper,uv) * tex, flow.b *2.);
+          // gl_FragColor = tex;
+          // if(flow.b>0.3) {
+          //   gl_FragColor = texture2D(uPaper,vUv) * tex;
+          // }
 
           // vec4 o = step(texture2D(uDithering, vUv/8.).g, texture2D(uTexture,vUv));
           // gl_FragColor = dither8x8(gl_FragCoord.xy,texture2D(uTexture,uv));
-          //gl_FragColor.a = 1.0;
+          
+
+          // gl_FragColor.rgb = flow;
+          // gl_FragColor.a = 1.0;
         }
       `
     });
