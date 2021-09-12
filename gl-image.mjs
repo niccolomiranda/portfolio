@@ -6,6 +6,16 @@ import { Mesh } from "https://unpkg.com/ogl@0.0.74/src/core/Mesh.js";
 import { Flowmap } from "https://unpkg.com/ogl@0.0.74/src/extras/Flowmap.js";
 import { Vec2 } from "https://unpkg.com/ogl@0.0.74/src/math/Vec2.js";
 
+class TextureLoader extends Texture {
+  load(src) {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => (this.image = img);
+    img.src = src;
+    return this;
+  }
+}
+
 class GLContext extends Rect {
   constructor(element) {
     super(element);
@@ -35,15 +45,22 @@ class GLImage extends GLContext {
     if (this.image.naturalWidth) this.onLoad();
     this.image.addEventListener("load", this.onLoad);
 
-    const texture = new Texture(this.gl, {
-      wrapS: this.gl.REPEAT,
-      wrapT: this.gl.REPEAT
-    });
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => (texture.image = img);
-    img.src =
-      "https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=https://www.shadertoy.com/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png";
+    const dithering = new TextureLoader(this.gl).load(
+      "https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=https://www.shadertoy.com/media/a/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png"
+    );
+    const paper = new TextureLoader(this.gl).load(
+      "https://h5fwhsu236.execute-api.us-east-2.amazonaws.com/ProxyBizarro?URL=https://uploads-ssl.webflow.com/5f2429f172d117fcee10e819/6059a3e2b9ae6d2bd508685c_pt-texture-2.jpg"
+    );
+
+    // const texture = new Texture(this.gl, {
+    //   wrapS: this.gl.REPEAT,
+    //   wrapT: this.gl.REPEAT
+    // });
+    // const img = new Image();
+    // img.crossOrigin = "anonymous";
+    // img.onload = () => (texture.image = img);
+    // img.src =
+    //   ;
 
     // Variable inputs to control flowmap
     this.aspect = 1;
@@ -63,7 +80,10 @@ class GLImage extends GLContext {
         },
         uFlow: this.flowmap.uniform,
         uDithering: {
-          value: texture
+          value: dithering
+        },
+        uPaper: {
+          value: paper
         }
       },
       vertex: `
@@ -83,6 +103,7 @@ class GLImage extends GLContext {
         uniform sampler2D uTexture;
         uniform sampler2D uFlow;
         uniform sampler2D uDithering;
+        uniform sampler2D uPaper;
         uniform float uTime;
 
         varying vec2 vUv;
@@ -195,7 +216,11 @@ class GLImage extends GLContext {
           vec4 dithered = dither8x8(gl_FragCoord.xy,texture2D(uTexture,uv));
           // float gray = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
 
-          gl_FragColor = mix( tex, dithered *3., flow.b);
+          gl_FragColor = mix( tex, texture2D(uPaper,vUv), flow.b);
+          gl_FragColor = tex;
+          if(flow.b>0.3) {
+            gl_FragColor = texture2D(uPaper,vUv);
+          }
 
           // vec4 o = step(texture2D(uDithering, vUv/8.).g, texture2D(uTexture,vUv));
           // gl_FragColor = dither8x8(gl_FragCoord.xy,texture2D(uTexture,uv));
