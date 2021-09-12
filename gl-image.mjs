@@ -219,32 +219,35 @@ class GLImage extends GLContext {
   }
 
   onMouseMove(e) {
-    if (e.changedTouches && e.changedTouches.length) {
-      e.x = e.changedTouches[0].pageX;
-      e.y = e.changedTouches[0].pageY;
-    }
-    if (e.x === undefined) {
-      e.x = e.pageX;
-      e.y = e.pageY;
-    }
+    // if (e.changedTouches && e.changedTouches.length) {
+    //   e.x = e.changedTouches[0].offsetX;
+    //   e.y = e.changedTouches[0].offsetY;
+    // }
+    // if (e.x === undefined) {
+    // e.x = e.offsetX;
+    // e.y = e.offsetY;
+    // }
+
+    const x = e.offsetX;
+    const y = e.offsetY;
 
     // Get mouse value in 0 to 1 range, with y flipped
     this.mouse.set(
-      e.x / this.gl.renderer.width,
-      1.0 - e.y / this.gl.renderer.height
+      x / this.gl.renderer.width,
+      1.0 - y / this.gl.renderer.height
     );
 
     // Calculate velocity
     if (!this.lastTime) {
       // First frame
       this.lastTime = performance.now();
-      this.lastMouse.set(e.x, e.y);
+      this.lastMouse.set(x, y);
     }
 
-    const deltaX = e.x - this.lastMouse.x;
-    const deltaY = e.y - this.lastMouse.y;
+    const deltaX = x - this.lastMouse.x;
+    const deltaY = y - this.lastMouse.y;
 
-    this.lastMouse.set(e.x, e.y);
+    this.lastMouse.set(x, y);
 
     let time = performance.now();
 
