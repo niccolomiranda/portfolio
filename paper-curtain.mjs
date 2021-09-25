@@ -313,7 +313,8 @@ export default class PaperCurtainEffect {
 
     // frame loop
     this.onFrameHandler = this.onFrame.bind(this)
-    requestAnimationFrame(this.onFrameHandler)
+    gsap.ticker.add(this.onFrameHandler)
+    //requestAnimationFrame(this.onFrameHandler)
 
     this.isLooping = false
     this.ease = ease
@@ -382,6 +383,6 @@ export default class PaperCurtainEffect {
 
 
 
-    requestAnimationFrame(this.onFrameHandler)
+    //requestAnimationFrame(this.onFrameHandler)
   }
 }
